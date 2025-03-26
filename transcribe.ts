@@ -125,7 +125,7 @@ async function hasExistingTranscript(
   return fs.existsSync(transcriptPath);
 }
 
-async function processPodcastDirectory(directory: string) {
+async function processPodcastDirectory(directory: string): Promise<boolean> {
   try {
     const metadataFiles = fs
       .readdirSync(directory)
@@ -154,6 +154,8 @@ async function processPodcastDirectory(directory: string) {
       try {
         const transcript = await transcribeAudio(metadata.enclosureUrl);
         await saveTranscript(directory, metadataFile, transcript);
+        console.log(`Successfully processed ${metadataFile}`);
+        return true; // Successfully processed a file
       } catch (error) {
         console.error(`Failed to transcribe episode ${metadata.title}:`, error);
         // Create a failed.txt file to track failed transcriptions
@@ -162,10 +164,14 @@ async function processPodcastDirectory(directory: string) {
           failedPath,
           `${metadataFile}\t${metadata.enclosureUrl}\n`
         );
+        // Continue to next file on error
+        continue;
       }
     }
+    return false; // No files were processed
   } catch (error) {
     console.error("Error processing directory:", error);
+    return false;
   }
 }
 
@@ -193,13 +199,34 @@ async function main() {
       return;
     }
 
-    const podcastsToProcess = podcastDirs.slice(0, numPodcasts);
-    for (const podcastDir of podcastsToProcess) {
+    let processedCount = 0;
+    let currentIndex = 0;
+
+    while (processedCount < numPodcasts && currentIndex < podcastDirs.length) {
+      const podcastDir = podcastDirs[currentIndex];
       const fullPath = path.join(dataDir, podcastDir);
+
       if (fs.statSync(fullPath).isDirectory()) {
         console.log(`\nProcessing podcast: ${podcastDir}`);
-        await processPodcastDirectory(fullPath);
+        const processed = await processPodcastDirectory(fullPath);
+
+        if (processed) {
+          processedCount++;
+          console.log(`Successfully processed ${processedCount} podcast(s)`);
+        } else {
+          console.log(
+            `No unprocessed files found in ${podcastDir}, moving to next directory...`
+          );
+        }
       }
+
+      currentIndex++;
+    }
+
+    if (processedCount === 0) {
+      console.log("No unprocessed files found in any directory");
+    } else {
+      console.log(`Completed processing ${processedCount} podcast(s)`);
     }
   } catch (error) {
     console.error("Main process failed:", error);
