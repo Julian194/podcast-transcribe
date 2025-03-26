@@ -217,7 +217,18 @@ async function findTranscriptFile(
           file.endsWith("_transcript.json") &&
           !file.endsWith("_labeled.json")
         ) {
-          return { transcriptFile: file, directory: dir };
+          // Check if labeled version already exists
+          const labeledFile = file.replace(
+            "_transcript.json",
+            "_transcript_labeled.json"
+          );
+          const labeledPath = path.join(dir, labeledFile);
+
+          if (!fs.existsSync(labeledPath)) {
+            return { transcriptFile: file, directory: dir };
+          } else {
+            console.log(`Skipping ${file} - already labeled`);
+          }
         }
       }
       return null;
