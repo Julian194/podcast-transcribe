@@ -119,7 +119,6 @@ async function downloadEpisodes(episodes: PodcastEpisode[]) {
   }
 }
 
-// Example usage
 async function main() {
   try {
     const searchResults = await searchPodcastsByPerson("luke leaman");
