@@ -130,7 +130,10 @@ async function processPodcastDirectory(directory: string) {
     const metadataFiles = fs
       .readdirSync(directory)
       .filter(
-        (file) => file.endsWith(".json") && !file.endsWith("_transcript.json")
+        (file) =>
+          file.endsWith(".json") &&
+          !file.endsWith("_transcript.json") &&
+          !file.endsWith("_transcript_labeled.json")
       );
 
     for (const metadataFile of metadataFiles) {
