@@ -4,7 +4,7 @@ A tool for downloading, transcribing, and analyzing podcast episodes featuring L
 
 ## Features
 
-- Downloads podcast metadata and episodes from Podcast Index API
+- Downloads podcast metadata and audio files from Podcast Index API
 - Transcribes audio using Replicate's Whisper Diarization model
 - Labels speakers using Google's Gemini AI
 - Organizes content in a structured data directory
@@ -28,7 +28,7 @@ bun install
 
 ## Usage
 
-1. Download metadata and episodes:
+1. Download podcast episodes and metadata:
 
 ```bash
 bun run download-metadata.ts
