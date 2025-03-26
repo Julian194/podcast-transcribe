@@ -116,6 +116,15 @@ async function saveTranscript(
   console.log(`Transcript saved to: ${transcriptPath}`);
 }
 
+async function hasExistingTranscript(
+  directory: string,
+  metadataFile: string
+): Promise<boolean> {
+  const transcriptFile = `${path.parse(metadataFile).name}_transcript.json`;
+  const transcriptPath = path.join(directory, transcriptFile);
+  return fs.existsSync(transcriptPath);
+}
+
 async function processPodcastDirectory(directory: string) {
   try {
     const metadataFiles = fs
@@ -130,6 +139,12 @@ async function processPodcastDirectory(directory: string) {
       const metadata = await loadEpisodeMetadata(directory, metadataFile);
       if (!metadata?.enclosureUrl) {
         console.error(`No enclosure URL found in metadata for ${metadataFile}`);
+        continue;
+      }
+
+      // Skip if transcript already exists
+      if (await hasExistingTranscript(directory, metadataFile)) {
+        console.log(`Skipping ${metadataFile} - transcript already exists`);
         continue;
       }
 
